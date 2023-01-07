@@ -1,32 +1,33 @@
 package gocollector
 
-import "time"
+import (
+	"time"
 
-type CollectorSource interface {
-	Get(string) any
-	List() []string
-}
-
-type CollectorDestination interface {
-	Put(string, any)
-}
+	"github.com/beranek1/godatainterface"
+)
 
 type Collector struct {
-	source      CollectorSource
-	destination CollectorDestination
+	source      godatainterface.DataSource
+	destination godatainterface.DataDestination
 	interval    time.Duration
 	ticker      *time.Ticker
 	done        chan bool
 }
 
-func Create(source CollectorSource, destination CollectorDestination, interval time.Duration) Collector {
+func Create(source godatainterface.DataSource, destination godatainterface.DataDestination, interval time.Duration) Collector {
 	return Collector{source: source, destination: destination, interval: interval, done: make(chan bool)}
 }
 
 func (c *Collector) collect() {
-	for _, key := range c.source.List() {
-		value := c.source.Get(key)
-		c.destination.Put(key, value)
+	keys, err := c.source.List()
+	if err != nil {
+		return
+	}
+	for _, key := range keys {
+		value, err := c.source.Get(key)
+		if err == nil {
+			c.destination.Put(key, value)
+		}
 	}
 }
 

@@ -10,24 +10,25 @@ type colSrc struct {
 	Keys  []string
 }
 
-func (s *colSrc) Get(key string) any {
+func (s *colSrc) Get(key string) (any, error) {
 	s.Count += 1
 	println("Get " + key)
-	return s.Count
+	return s.Count, nil
 }
 
-func (s *colSrc) List() []string {
+func (s *colSrc) List() ([]string, error) {
 	println("List")
-	return s.Keys
+	return s.Keys, nil
 }
 
 type colDes struct {
 	Count uint
 }
 
-func (d *colDes) Put(key string, data any) {
+func (d *colDes) Put(key string, data any) error {
 	println("Put " + key)
 	d.Count += 1
+	return nil
 }
 
 func TestCreate(t *testing.T) {
